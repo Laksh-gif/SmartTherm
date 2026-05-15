@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTherm - Smart Cooling Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar glass-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fa-solid fa-snowflake fa-spin-pulse" style="--fa-animation-duration: 3s; color: var(--accent-cyan);"></i>
+                <span>SmartTherm</span>
+            </div>
+            
+            <ul id="nav-links" class="nav-links">
+                <li><a href="#" class="nav-item active" data-target="view-dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-item" data-target="view-analytics">Analytics</a></li>
+                <li><a href="#" class="nav-item" data-target="view-energy">Energy</a></li>
+                <li><a href="#" class="nav-item" data-target="view-settings">Settings</a></li>
+                <li><a href="#" class="nav-item" data-target="view-about">About</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <select id="room-selector" class="nav-room-dropdown glass-input">
+                    <option value="room1">Conference Room A</option>
+                    <option value="room2">Main Office</option>
+                    <option value="room3">Server Room</option>
+                </select>
+                <div class="notification-bell">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge" id="alert-badge">0</span>
+                </div>
+                <button id="mobile-menu-btn" class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="website-wrapper" id="app-container">
+        
+        <!-- Main Content Area -->
+        <main class="page-content">
+
+            <div id="view-container">
+            <!-- Dashboard View -->
+            <section id="view-dashboard" class="view active">
+                <div class="hero-section">
+                    <h1 class="hero-title">Live Monitoring: <span id="current-room-title" class="text-gradient">Conference Room A</span></h1>
+                    <p class="hero-subtitle">Real-time environmental data and automated cooling status.</p>
+                    <div class="hero-badges">
+                        <span class="automation-badge active"><i class="fa-solid fa-robot"></i> Auto Mode Active</span>
+                        <div class="system-status"><div class="status-indicator online"></div><span>ESP32 Connected</span></div>
+                        <div class="time-display" id="clock">12:00 PM</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    
+                    <!-- Stat Cards -->
+                    <div class="stat-card glass-panel temp-card">
+                        <div class="card-icon"><i class="fa-solid fa-temperature-half"></i></div>
+                        <div class="card-info">
+                            <span class="label">Temperature</span>
+                            <div class="value"><span id="val-temp">24.5</span>°C</div>
+                            <div class="trend" id="trend-temp"><i class="fa-solid fa-arrow-down"></i> Cooling</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel power-card">
+                        <div class="card-icon"><i class="fa-solid fa-plug"></i></div>
+                        <div class="card-info">
+                            <span class="label">Power Usage</span>
+                            <div class="value"><span id="val-power">1.2</span> kW</div>
+                            <div class="trend warning" id="trend-power"><i class="fa-solid fa-bolt"></i> Normal</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel occ-card">
+                        <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+                        <div class="card-info">
+                            <span class="label">Occupancy</span>
+                            <div class="value" id="val-occ">Occupied</div>
+                            <div class="trend neutral" id="trend-occ">Movement detected</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card glass-panel ac-card">
+                        <div class="card-icon"><i class="fa-solid fa-fan fa-spin" id="ac-icon"></i></div>
+                        <div class="card-info">
+                            <span class="label">AC Status</span>
+                            <div class="value" id="val-ac">ON (Cool)</div>
+                            <div class="trend" id="trend-ac">Eco Mode: OFF</div>
+                        </div>
+                    </div>
+
+                    <!-- Main Chart Area -->
+                    <div class="chart-container glass-panel">
+                        <div class="panel-header">
+                            <h2>Real-Time Trends</h2>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="mainChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Control Panel -->
+                    <div class="control-panel glass-panel">
+                        <div class="panel-header">
+                            <h2>AC Controls</h2>
+                            <div class="toggle-container">
+                                <span class="toggle-label">Auto</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="auto-toggle" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="control-grid">
+                            <div class="control-group">
+                                <label>Power</label>
+                                <button id="btn-power" class="btn btn-power active"><i class="fa-solid fa-power-off"></i></button>
+                            </div>
+
+                            <div class="control-group temp-control">
+                                <label>Target Temperature</label>
+                                <div class="temp-stepper">
+                                    <button id="btn-temp-down" class="btn btn-round"><i class="fa-solid fa-minus"></i></button>
+                                    <span class="target-temp"><span id="val-target-temp">24</span>°C</span>
+                                    <button id="btn-temp-up" class="btn btn-round"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="control-group" style="grid-column: span 2;">
+                                <label>Mode</label>
+                                <div class="mode-selector">
+                                    <button class="btn btn-mode active" data-mode="cool"><i class="fa-solid fa-snowflake"></i></button>
+                                    <button class="btn btn-mode" data-mode="eco"><i class="fa-solid fa-leaf"></i></button>
+                                    <button class="btn btn-mode" data-mode="fan"><i class="fa-solid fa-wind"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Automation Logs / Alerts -->
+                    <div class="logs-panel glass-panel">
+                        <div class="panel-header">
+                            <h2>System Events</h2>
+                        </div>
+                        <ul class="event-log" id="event-log">
+                            <!-- Logs will be populated here -->
+                        </ul>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Analytics View -->
+            <section id="view-analytics" class="view">
+                <div class="hero-section">
+                    <h1 class="hero-title">Comparative <span class="text-gradient">Analytics</span></h1>
+                    <p class="hero-subtitle">Analyze temperature and occupancy patterns across all monitored spaces.</p>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="chart-container glass-panel" style="grid-column: span 2;">
+                        <div class="panel-header"><h2>Average Room Temperatures</h2></div>
+                        <div class="canvas-wrapper"><canvas id="analyticsTempChart"></canvas></div>
+                    </div>
+                    <div class="chart-container glass-panel" style="grid-column: span 2;">
+                        <div class="panel-header"><h2>Occupancy Distribution</h2></div>
+                        <div class="canvas-wrapper"><canvas id="analyticsOccChart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Energy View -->
+            <section id="view-energy" class="view">
+                <div class="hero-section">
+                    <h1 class="hero-title">Energy <span class="text-gradient">Savings</span></h1>
+                    <p class="hero-subtitle">Detailed breakdown of power usage and carbon footprint reductions.</p>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="stat-card glass-panel temp-card">
+                        <div class="card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green);"><i class="fa-solid fa-leaf"></i></div>
+                        <div class="card-info">
+                            <span class="label">CO2 Saved</span>
+                            <div class="value">142 kg</div>
+                            <div class="trend neutral">This month</div>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-panel ac-card">
+                        <div class="card-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                        <div class="card-info">
+                            <span class="label">Est. Savings</span>
+                            <div class="value">$240.50</div>
+                            <div class="trend"><i class="fa-solid fa-arrow-up"></i> 12% vs last month</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container glass-panel" style="grid-column: span 4; min-height: 500px;">
+                        <div class="panel-header"><h2>Monthly Energy Usage Trend (kWh)</h2></div>
+                        <div class="canvas-wrapper"><canvas id="energyTrendChart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="view-settings" class="view">
+                <div class="hero-section">
+                    <h1 class="hero-title">System <span class="text-gradient">Settings</span></h1>
+                    <p class="hero-subtitle">Configure automation thresholds and global preferences.</p>
+                </div>
+                <div class="settings-grid">
+                    <div class="glass-panel settings-card">
+                        <div class="panel-header"><h2>Automation Thresholds</h2></div>
+                        <div class="form-group">
+                            <label>Unoccupied Timeout (seconds)</label>
+                            <input type="number" id="setting-timeout" class="glass-input-field" value="15">
+                            <span class="help-text">Time before AC switches to ECO mode when room is empty.</span>
+                        </div>
+                        <div class="form-group">
+                            <label>Power Overload Limit (kW)</label>
+                            <input type="number" id="setting-overload" class="glass-input-field" value="4.0" step="0.1">
+                            <span class="help-text">Maximum power per room before system shedding.</span>
+                        </div>
+                        <button class="btn btn-primary" id="btn-save-settings">Save Thresholds</button>
+                    </div>
+                    <div class="glass-panel settings-card">
+                        <div class="panel-header"><h2>Global Preferences</h2></div>
+                        <div class="form-group toggle-group">
+                            <span>Enable Email Alerts</span>
+                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                        </div>
+                        <div class="form-group toggle-group">
+                            <span>Auto-Restart after Power Loss</span>
+                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About View -->
+            <section id="view-about" class="view">
+                <div class="hero-section">
+                    <h1 class="hero-title text-gradient">SmartTherm</h1>
+                    <p class="hero-subtitle">The Intelligent Cooling Management System.</p>
+                </div>
+                <div class="about-content glass-panel">
+                    <div class="about-grid">
+                        <article>
+                            <h3><i class="fa-solid fa-circle-exclamation text-orange"></i> Problem Statement</h3>
+                            <p>In commercial buildings, offices, industries, malls, and institutions, air conditioners are often used inefficiently. ACs continue running even when rooms are empty, temperatures are set unnecessarily low, and there is no proper real-time monitoring of electricity usage. This leads to excessive power consumption, higher operational costs, overload on electrical systems, and unnecessary energy wastage.</p>
+                            <p>Most existing cooling systems work manually and do not adapt according to room occupancy or environmental conditions. There is a need for a simple, affordable, and practical system that can automatically manage cooling more efficiently without replacing existing AC infrastructure.</p>
+                        </article>
+                        
+                        <article>
+                            <h3><i class="fa-solid fa-lightbulb text-cyan"></i> Proposed Solution</h3>
+                            <p>SmartTherm is a smart cooling management system that combines hardware sensors, ESP32 controllers, and monitoring software to automatically optimize AC usage based on room conditions and occupancy.</p>
+                            <p>The system detects whether people are present in a room, monitors temperature and energy usage, and then automatically adjusts cooling to reduce unnecessary electricity consumption.</p>
+                        </article>
+
+                        <article class="full-width">
+                            <h3><i class="fa-solid fa-bullseye text-green"></i> Project Objectives</h3>
+                            <ul class="about-list">
+                                <li><i class="fa-solid fa-check"></i> Reducing AC wastage across large scale deployments</li>
+                                <li><i class="fa-solid fa-check"></i> Lowering electricity consumption significantly</li>
+                                <li><i class="fa-solid fa-check"></i> Improving overall energy efficiency</li>
+                                <li><i class="fa-solid fa-check"></i> Reducing overload stress on main power grids</li>
+                                <li><i class="fa-solid fa-check"></i> Creating smarter, automated building management</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </section>
+            
+            </div> <!-- End view-container -->
+            
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <i class="fa-solid fa-snowflake" style="color: var(--accent-cyan);"></i> SmartTherm
+                    </div>
+                    <p>&copy; 2026 SmartTherm Technologies. All rights reserved.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Toast Container for Alerts -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/simulator.js"></script>
+    <script src="js/automation.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
