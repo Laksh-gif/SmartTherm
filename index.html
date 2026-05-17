@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTherm - Smart Cooling Management</title>
-    <!-- Google Fonts -->
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
+    
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Top Navigation Bar -->
+
     <nav class="top-navbar glass-nav">
         <div class="nav-container">
             <div class="nav-logo">
@@ -47,11 +47,11 @@
 
     <div class="website-wrapper" id="app-container">
         
-        <!-- Main Content Area -->
+        
         <main class="page-content">
 
             <div id="view-container">
-            <!-- Dashboard View -->
+           
             <section id="view-dashboard" class="view active">
                 <div class="hero-section">
                     <h1 class="hero-title">Live Monitoring: <span id="current-room-title" class="text-gradient">Conference Room A</span></h1>
@@ -65,7 +65,7 @@
 
                 <div class="dashboard-grid">
                     
-                    <!-- Stat Cards -->
+                   
                     <div class="stat-card glass-panel temp-card">
                         <div class="card-icon"><i class="fa-solid fa-temperature-half"></i></div>
                         <div class="card-info">
@@ -102,7 +102,7 @@
                         </div>
                     </div>
 
-                    <!-- Main Chart Area -->
+                    
                     <div class="chart-container glass-panel">
                         <div class="panel-header">
                             <h2>Real-Time Trends</h2>
@@ -112,7 +112,7 @@
                         </div>
                     </div>
 
-                    <!-- Control Panel -->
+                   
                     <div class="control-panel glass-panel">
                         <div class="panel-header">
                             <h2>AC Controls</h2>
@@ -151,20 +151,19 @@
                         </div>
                     </div>
                     
-                    <!-- Automation Logs / Alerts -->
                     <div class="logs-panel glass-panel">
                         <div class="panel-header">
                             <h2>System Events</h2>
                         </div>
                         <ul class="event-log" id="event-log">
-                            <!-- Logs will be populated here -->
+                           
                         </ul>
                     </div>
 
                 </div>
             </section>
 
-            <!-- Analytics View -->
+      
             <section id="view-analytics" class="view">
                 <div class="hero-section">
                     <h1 class="hero-title">Comparative <span class="text-gradient">Analytics</span></h1>
@@ -182,7 +181,6 @@
                 </div>
             </section>
 
-            <!-- Energy View -->
             <section id="view-energy" class="view">
                 <div class="hero-section">
                     <h1 class="hero-title">Energy <span class="text-gradient">Savings</span></h1>
@@ -213,7 +211,7 @@
                 </div>
             </section>
 
-            <!-- Settings View -->
+            
             <section id="view-settings" class="view">
                 <div class="hero-section">
                     <h1 class="hero-title">System <span class="text-gradient">Settings</span></h1>
@@ -248,7 +246,7 @@
                 </div>
             </section>
 
-            <!-- About View -->
+            
             <section id="view-about" class="view">
                 <div class="about-hero glass-panel">
                     <div class="about-hero-content">
@@ -313,7 +311,7 @@
                 </div>
             </section>
             
-            </div> <!-- End view-container -->
+            </div> 
             
             <footer class="site-footer">
                 <div class="footer-content">
@@ -326,13 +324,13 @@
         </main>
     </div>
 
-    <!-- Toast Container for Alerts -->
+   
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Chart.js -->
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- App Scripts -->
+    
     <script src="js/simulator.js"></script>
     <script src="js/automation.js"></script>
     <script src="js/ui.js"></script>
