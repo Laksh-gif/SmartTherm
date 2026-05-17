@@ -1,6 +1,4 @@
-/**
- * Handles DOM updates, charts, and user interactions.
- */
+
 class UIManager {
     constructor(simulator, automation) {
         this.simulator = simulator;
@@ -8,7 +6,7 @@ class UIManager {
         this.currentRoomId = 'room1';
         this.roomsData = null;
         
-        // Chart Data History
+       
         this.history = {
             labels: [],
             tempData: [],
@@ -23,14 +21,14 @@ class UIManager {
     }
 
     initDOM() {
-        // Elements
+       
         this.els = {
             roomSelector: document.getElementById('room-selector'),
             roomTitle: document.getElementById('current-room-title'),
             clock: document.getElementById('clock'),
             alertBadge: document.getElementById('alert-badge'),
             
-            // Stats
+            
             valTemp: document.getElementById('val-temp'),
             valPower: document.getElementById('val-power'),
             valOcc: document.getElementById('val-occ'),
@@ -42,7 +40,7 @@ class UIManager {
             trendOcc: document.getElementById('trend-occ'),
             trendAc: document.getElementById('trend-ac'),
             
-            // Controls
+            
             autoToggle: document.getElementById('auto-toggle'),
             btnPower: document.getElementById('btn-power'),
             btnTempDown: document.getElementById('btn-temp-down'),
@@ -50,23 +48,23 @@ class UIManager {
             valTargetTemp: document.getElementById('val-target-temp'),
             btnModes: document.querySelectorAll('.btn-mode'),
             
-            // Logs & Toasts
+            
             eventLog: document.getElementById('event-log'),
             toastContainer: document.getElementById('toast-container'),
             
-            // Navigation
+            
             navItems: document.querySelectorAll('.nav-item[data-target]'),
             views: document.querySelectorAll('.view'),
             mobileMenuBtn: document.getElementById('mobile-menu-btn'),
             navLinks: document.getElementById('nav-links'),
             
-            // Settings
+            
             btnSaveSettings: document.getElementById('btn-save-settings'),
             settingTimeout: document.getElementById('setting-timeout'),
             settingOverload: document.getElementById('setting-overload')
         };
         
-        // Start Clock
+        
         setInterval(() => {
             const now = new Date();
             this.els.clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -76,7 +74,7 @@ class UIManager {
     initChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
         
-        // Chart.js global defaults for premium dark theme
+       
         Chart.defaults.color = '#a1a1aa';
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(9, 9, 11, 0.9)';
@@ -119,7 +117,7 @@ class UIManager {
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { display: false } // Hide legend for cleaner look
+                    legend: { display: false } 
                 },
                 scales: {
                     x: { grid: { display: false }, border: { display: false } },
@@ -211,26 +209,26 @@ class UIManager {
     }
 
     bindEvents() {
-        // Room selection
+       
         this.els.roomSelector.addEventListener('change', (e) => {
             this.currentRoomId = e.target.value;
-            // Clear chart history on room change
+            
             this.history.labels = [];
             this.history.tempData = [];
             this.history.powerData = [];
-            this.updateUI(); // Force immediate update
+            this.updateUI(); 
         });
 
-        // Navigation (SPA Views)
+        
         this.els.navItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 
-                // Update active nav link
+                
                 this.els.navItems.forEach(nav => nav.classList.remove('active'));
                 e.currentTarget.classList.add('active');
                 
-                // Show target view
+               
                 const targetId = e.currentTarget.dataset.target;
                 this.els.views.forEach(view => {
                     if (view.id === targetId) {
@@ -240,7 +238,7 @@ class UIManager {
                     }
                 });
 
-                // Close mobile menu if open
+                
                 if (this.els.navLinks && this.els.navLinks.classList.contains('active')) {
                     this.els.navLinks.classList.remove('active');
                     this.els.mobileMenuBtn.innerHTML = '<i class="fa-solid fa-bars"></i>';
@@ -248,7 +246,7 @@ class UIManager {
             });
         });
 
-        // Mobile Menu Toggle
+        
         if (this.els.mobileMenuBtn && this.els.navLinks) {
             this.els.mobileMenuBtn.addEventListener('click', () => {
                 this.els.navLinks.classList.toggle('active');
@@ -260,7 +258,7 @@ class UIManager {
             });
         }
 
-        // Controls
+       
         this.els.autoToggle.addEventListener('change', (e) => {
             this.automation.toggleAuto(this.currentRoomId, e.target.checked);
         });
@@ -268,7 +266,7 @@ class UIManager {
         this.els.btnPower.addEventListener('click', () => {
             if(!this.roomsData) return;
             const currentOn = this.roomsData[this.currentRoomId].acState.on;
-            // Manual override -> disable auto temporarily? We'll just change state for now.
+        
             this.simulator.setACState(this.currentRoomId, { on: !currentOn });
         });
 
@@ -287,21 +285,21 @@ class UIManager {
         this.els.btnModes.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const mode = e.currentTarget.dataset.mode;
-                this.simulator.setACState(this.currentRoomId, { mode: mode, on: true }); // Switching mode implies turning ON
+                this.simulator.setACState(this.currentRoomId, { mode: mode, on: true }); 
             });
         });
 
-        // Listen for new simulated data
+        
         this.simulator.subscribe((data) => {
             this.roomsData = data;
             this.updateUI();
         });
 
-        // Listen for automation events
+      
         this.automation.setEventCallback((event) => this.addLogEntry(event));
         this.automation.setAlertCallback((alert) => this.showToast(alert.title, alert.message, alert.type));
 
-        // Settings
+    
         if (this.els.btnSaveSettings) {
             this.els.btnSaveSettings.addEventListener('click', () => {
                 const timeout = parseInt(this.els.settingTimeout.value, 10);
@@ -321,10 +319,10 @@ class UIManager {
         const room = this.roomsData[this.currentRoomId];
         const ac = room.acState;
 
-        // Update Header
+        
         this.els.roomTitle.textContent = room.name;
 
-        // Update Stats
+  
         this.els.valTemp.textContent = room.temp.toFixed(1);
         this.els.valPower.textContent = room.power.toFixed(2);
         
@@ -362,7 +360,7 @@ class UIManager {
             this.els.trendAc.textContent = 'Standby';
         }
 
-        // Update Controls
+     
         this.els.autoToggle.checked = this.automation.settings.autoEnabled[this.currentRoomId];
         this.els.valTargetTemp.textContent = ac.targetTemp;
         
@@ -382,7 +380,7 @@ class UIManager {
             }
         });
 
-        // Update Chart
+        
         const timeLabel = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
         this.history.labels.push(timeLabel);
         this.history.powerData.push(room.power);
@@ -394,11 +392,11 @@ class UIManager {
             this.history.tempData.shift();
         }
 
-        this.chart.update('none'); // Update without animation for smooth streaming
+        this.chart.update('none'); 
     }
 
     addLogEntry(event) {
-        // Only show logs relevant to current room (or global)
+        
         if (event.roomId !== this.currentRoomId) return;
 
         const li = document.createElement('li');
@@ -441,12 +439,12 @@ class UIManager {
         
         this.els.toastContainer.appendChild(toast);
         
-        // Update badge
+     
         let currentCount = parseInt(this.els.alertBadge.textContent);
         this.els.alertBadge.textContent = currentCount + 1;
         this.els.alertBadge.style.display = 'block';
 
-        // Auto remove
+        
         setTimeout(() => {
             toast.style.animation = 'slideOut 0.3s forwards';
             setTimeout(() => {
