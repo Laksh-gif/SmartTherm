@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartTherm - Smart Cooling Management</title>
+    <title>SmartTherm - Adaptive Energy Intelligence</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,10 +31,8 @@
             </ul>
 
             <div class="nav-actions">
-                <select id="room-selector" class="nav-room-dropdown glass-input">
-                    <option value="room1">Conference Room A</option>
-                    <option value="room2">Main Office</option>
-                    <option value="room3">Server Room</option>
+                <select id="room-selector" class="nav-room-dropdown glass-input" aria-label="Prototype room selector">
+                    <option value="room1">Prototype Room</option>
                 </select>
                 <div class="notification-bell">
                     <i class="fa-regular fa-bell"></i>
@@ -54,8 +52,8 @@
            
             <section id="view-dashboard" class="view active">
                 <div class="hero-section">
-                    <h1 class="hero-title">Live Monitoring: <span id="current-room-title" class="text-gradient">Conference Room A</span></h1>
-                    <p class="hero-subtitle">Real-time environmental data and automated cooling status.</p>
+                    <h1 class="hero-title">Live Monitoring: <span id="current-room-title" class="text-gradient">Prototype Room</span></h1>
+                    <p class="hero-subtitle">Single-room prototype for adaptive appliance control, comfort monitoring, and energy optimization.</p>
                     <div class="hero-badges">
                         <span class="automation-badge active"><i class="fa-solid fa-robot"></i> Auto Mode Active</span>
                         <div class="system-status"><div class="status-indicator online"></div><span>ESP32 Connected</span></div>
@@ -70,7 +68,7 @@
                         <div class="card-icon"><i class="fa-solid fa-temperature-half"></i></div>
                         <div class="card-info">
                             <span class="label">Temperature</span>
-                            <div class="value"><span id="val-temp">24.5</span>°C</div>
+                            <div class="value"><span id="val-temp">24.5</span>&deg;C</div>
                             <div class="trend" id="trend-temp"><i class="fa-solid fa-arrow-down"></i> Cooling</div>
                         </div>
                     </div>
@@ -135,7 +133,7 @@
                                 <label>Target Temperature</label>
                                 <div class="temp-stepper">
                                     <button id="btn-temp-down" class="btn btn-round"><i class="fa-solid fa-minus"></i></button>
-                                    <span class="target-temp"><span id="val-target-temp">24</span>°C</span>
+                                    <span class="target-temp"><span id="val-target-temp">24</span>&deg;C</span>
                                     <button id="btn-temp-up" class="btn btn-round"><i class="fa-solid fa-plus"></i></button>
                                 </div>
                             </div>
@@ -166,16 +164,82 @@
       
             <section id="view-analytics" class="view">
                 <div class="hero-section">
-                    <h1 class="hero-title">Comparative <span class="text-gradient">Analytics</span></h1>
-                    <p class="hero-subtitle">Analyze temperature and occupancy patterns across all monitored spaces.</p>
+                    <h1 class="hero-title">Thermal Mapping <span class="text-gradient">Analytics</span></h1>
+                    <p class="hero-subtitle">Live heat-state visualization and comfort intelligence for the prototype room.</p>
                 </div>
-                <div class="dashboard-grid">
-                    <div class="chart-container glass-panel" style="grid-column: span 2;">
-                        <div class="panel-header"><h2>Average Room Temperatures</h2></div>
+                <div class="dashboard-grid analytics-grid">
+                    <div class="thermal-map-panel glass-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2>Thermal Mapping</h2>
+                                <p class="panel-subtitle">The room tile changes smoothly from green to yellow or red as temperature risk changes.</p>
+                            </div>
+                            <span class="thermal-status-pill" id="thermal-status-pill">Safe Zone</span>
+                        </div>
+
+                        <div class="thermal-map-layout">
+                            <div class="thermal-room-card thermal-safe" id="thermal-room-card">
+                                <div class="thermal-layer thermal-layer-safe"></div>
+                                <div class="thermal-layer thermal-layer-caution"></div>
+                                <div class="thermal-layer thermal-layer-critical"></div>
+                                <div class="thermal-scan"></div>
+                                <div class="thermal-room-content">
+                                    <div class="thermal-room-topline">
+                                        <span id="thermal-room-name">Prototype Room</span>
+                                        <i class="fa-solid fa-temperature-three-quarters"></i>
+                                    </div>
+                                    <div class="thermal-room-temp" id="thermal-room-temp">24.5&deg;C</div>
+                                    <div class="thermal-room-state" id="thermal-room-state">Balanced cooling envelope</div>
+                                </div>
+                            </div>
+
+                            <div class="thermal-readout-grid">
+                                <div class="thermal-readout">
+                                    <span>Humidity</span>
+                                    <strong id="thermal-humidity">48% RH</strong>
+                                </div>
+                                <div class="thermal-readout">
+                                    <span>Power Load</span>
+                                    <strong id="thermal-power">0.20 kW</strong>
+                                </div>
+                                <div class="thermal-readout">
+                                    <span>Occupancy</span>
+                                    <strong id="thermal-occupancy">Occupied</strong>
+                                </div>
+                                <div class="thermal-readout">
+                                    <span>AC Mode</span>
+                                    <strong id="thermal-ac-mode">Cool</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comfort-score-panel">
+                            <div class="comfort-score-summary">
+                                <span class="label">Comfort Score</span>
+                                <div class="comfort-score-value"><span id="comfort-score">87</span><small>%</small></div>
+                                <div class="comfort-status" id="comfort-status">Excellent comfort balance</div>
+                            </div>
+                            <div class="comfort-score-details">
+                                <div class="comfort-meter">
+                                    <div class="comfort-meter-fill" id="comfort-score-bar"></div>
+                                </div>
+                                <div class="comfort-factor-grid">
+                                    <span id="comfort-temp-factor">Temp 92</span>
+                                    <span id="comfort-humidity-factor">Humidity 94</span>
+                                    <span id="comfort-occupancy-factor">Occupancy 90</span>
+                                    <span id="comfort-energy-factor">Energy 82</span>
+                                </div>
+                                <p id="comfort-insight" class="comfort-insight">The room is inside the preferred thermal range with efficient appliance activity.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container glass-panel analytics-chart">
+                        <div class="panel-header"><h2>Comfort Score Trend</h2></div>
                         <div class="canvas-wrapper"><canvas id="analyticsTempChart"></canvas></div>
                     </div>
-                    <div class="chart-container glass-panel" style="grid-column: span 2;">
-                        <div class="panel-header"><h2>Occupancy Distribution</h2></div>
+                    <div class="chart-container glass-panel analytics-chart">
+                        <div class="panel-header"><h2>Comfort Factor Balance</h2></div>
                         <div class="canvas-wrapper"><canvas id="analyticsOccChart"></canvas></div>
                     </div>
                 </div>
@@ -199,7 +263,7 @@
                         <div class="card-icon"><i class="fa-solid fa-piggy-bank"></i></div>
                         <div class="card-info">
                             <span class="label">Est. Savings</span>
-                            <div class="value">$240.50</div>
+                            <div class="value">Rs. 18,500</div>
                             <div class="trend"><i class="fa-solid fa-arrow-up"></i> 12% vs last month</div>
                         </div>
                     </div>
@@ -228,7 +292,7 @@
                         <div class="form-group">
                             <label>Power Overload Limit (kW)</label>
                             <input type="number" id="setting-overload" class="glass-input-field" value="4.0" step="0.1">
-                            <span class="help-text">Maximum power per room before system shedding.</span>
+                            <span class="help-text">Maximum prototype-room power before system shedding.</span>
                         </div>
                         <button class="btn btn-primary" id="btn-save-settings">Save Thresholds</button>
                     </div>
@@ -248,65 +312,124 @@
 
             
             <section id="view-about" class="view">
-                <div class="about-hero glass-panel">
+                <div class="about-hero">
                     <div class="about-hero-content">
-                        <div class="about-badge">Innovation</div>
+                        <div class="about-badge">Retrofit Prototype</div>
                         <h1 class="hero-title text-gradient">SmartTherm</h1>
-                        <p class="hero-subtitle">The Intelligent Cooling Management System.</p>
-                        <p class="about-hero-desc">Transforming the way the world cools by blending cutting-edge IoT technology with elegant automation, reducing carbon footprints without compromising comfort.</p>
+                        <p class="hero-subtitle">Adaptive Energy & Environmental Intelligence System.</p>
+                        <p class="about-hero-desc">SmartTherm adds an intelligent sensing and automation layer over existing commercial spaces, helping ordinary rooms respond to occupancy, comfort, and power conditions in real time.</p>
+                        <div class="about-metric-row">
+                            <div class="about-metric">
+                                <span>Prototype Scope</span>
+                                <strong>1 Room</strong>
+                            </div>
+                            <div class="about-metric">
+                                <span>Core Hardware</span>
+                                <strong>ESP32</strong>
+                            </div>
+                            <div class="about-metric">
+                                <span>Primary Goal</span>
+                                <strong>Energy Intelligence</strong>
+                            </div>
+                        </div>
                     </div>
-                    <div class="about-hero-image">
+                    <div class="about-hero-image" aria-label="SmartTherm prototype visualization">
                         <img src="assets/smart_cooling_hero.png" alt="SmartTherm abstract representation">
-                        <div class="glow-effect"></div>
+                        <div class="about-live-strip">
+                            <span><i class="fa-solid fa-temperature-half"></i> Thermal map</span>
+                            <span><i class="fa-solid fa-bolt"></i> Power sense</span>
+                            <span><i class="fa-solid fa-user-check"></i> Occupancy</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="about-features-container">
-                    <div class="about-grid">
-                        <article class="about-card glass-panel premium-card">
-                            <div class="card-glow orange-glow"></div>
-                            <div class="card-icon-large text-orange"><i class="fa-solid fa-fire"></i></div>
-                            <h3>The Problem</h3>
-                            <p>In commercial buildings, offices, and industries, air conditioners are often used inefficiently. ACs continue running even when rooms are empty, temperatures are set unnecessarily low, and there is no proper real-time monitoring of electricity usage. This leads to excessive power consumption, higher operational costs, overload on electrical systems, and unnecessary energy wastage.</p>
-                        </article>
-                        
-                        <article class="about-card glass-panel premium-card">
-                            <div class="card-glow cyan-glow"></div>
-                            <div class="card-icon-large text-cyan"><i class="fa-solid fa-lightbulb"></i></div>
-                            <h3>Proposed Solution</h3>
-                            <p>SmartTherm is a smart cooling management system that combines hardware sensors, ESP32 controllers, and monitoring software to automatically optimize AC usage based on room conditions and occupancy.</p>
-                            <p>The system detects whether people are present in a room, monitors temperature and energy usage, and then automatically adjusts cooling to reduce unnecessary electricity consumption.</p>
-                        </article>
+                    <div class="about-section-heading">
+                        <span class="about-eyebrow">Project Positioning</span>
+                        <h2>Built for practical Indian commercial spaces</h2>
+                        <p>Instead of replacing infrastructure, SmartTherm makes existing rooms smarter through sensors, automation logic, and a live dashboard.</p>
+                    </div>
 
-                        <article class="full-width about-card glass-panel premium-card objectives-card">
-                            <div class="card-glow green-glow"></div>
-                            <div class="objectives-header">
-                                <div class="card-icon-large text-green"><i class="fa-solid fa-bullseye"></i></div>
-                                <h3>Project Objectives</h3>
-                            </div>
-                            <ul class="about-list premium-list">
-                                <li>
-                                    <div class="li-icon"><i class="fa-solid fa-check"></i></div>
-                                    <span>Reducing AC wastage across large scale deployments</span>
-                                </li>
-                                <li>
-                                    <div class="li-icon"><i class="fa-solid fa-bolt"></i></div>
-                                    <span>Lowering electricity consumption significantly</span>
-                                </li>
-                                <li>
-                                    <div class="li-icon"><i class="fa-solid fa-leaf"></i></div>
-                                    <span>Improving overall energy efficiency & sustainability</span>
-                                </li>
-                                <li>
-                                    <div class="li-icon"><i class="fa-solid fa-plug-circle-minus"></i></div>
-                                    <span>Reducing overload stress on main power grids</span>
-                                </li>
-                                <li>
-                                    <div class="li-icon"><i class="fa-solid fa-microchip"></i></div>
-                                    <span>Creating smarter, automated building management</span>
-                                </li>
+                    <div class="about-grid">
+                        <article class="about-card about-problem-card">
+                            <div class="card-icon-large text-orange"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                            <h3>The Problem</h3>
+                            <p>Commercial rooms often waste electricity because ACs, lights, and fans keep running without awareness of actual occupancy, temperature, humidity, or load conditions.</p>
+                            <ul class="about-mini-list">
+                                <li><i class="fa-solid fa-circle-xmark"></i> Appliances running in empty rooms</li>
+                                <li><i class="fa-solid fa-circle-xmark"></i> No live visibility into energy-heavy zones</li>
+                                <li><i class="fa-solid fa-circle-xmark"></i> Manual control causing comfort and cost imbalance</li>
                             </ul>
                         </article>
+                        
+                        <article class="about-card about-solution-card">
+                            <div class="card-icon-large text-cyan"><i class="fa-solid fa-lightbulb"></i></div>
+                            <h3>Proposed Solution</h3>
+                            <p>SmartTherm uses ESP32-based sensing, non-invasive monitoring, IR control, smart relays, and dashboard intelligence to make appliance behavior adaptive instead of fixed.</p>
+                            <ul class="about-mini-list">
+                                <li><i class="fa-solid fa-circle-check"></i> Senses activity and environmental conditions</li>
+                                <li><i class="fa-solid fa-circle-check"></i> Optimizes comfort and energy together</li>
+                                <li><i class="fa-solid fa-circle-check"></i> Works as a retrofit layer over existing appliances</li>
+                            </ul>
+                        </article>
+
+                        <article class="about-card about-feature-card">
+                            <div class="card-icon-large text-green"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <h3>Thermal Mapping</h3>
+                            <p>The dashboard converts invisible room conditions into a live visual state, showing whether the prototype room is safe, warming, or outside the ideal comfort band.</p>
+                        </article>
+
+                        <article class="about-card about-feature-card">
+                            <div class="card-icon-large text-cyan"><i class="fa-solid fa-gauge-high"></i></div>
+                            <h3>Comfort Score</h3>
+                            <p>A real-time score blends temperature, humidity, occupancy, power usage, and AC state so comfort and efficiency can be judged together.</p>
+                        </article>
+                    </div>
+
+                    <div class="about-flow">
+                        <div class="about-section-heading compact">
+                            <span class="about-eyebrow">System Flow</span>
+                            <h2>How the prototype thinks</h2>
+                        </div>
+                        <div class="about-flow-grid">
+                            <div class="about-flow-step">
+                                <span>01</span>
+                                <i class="fa-solid fa-satellite-dish"></i>
+                                <h3>Sense</h3>
+                                <p>Occupancy, temperature, humidity, and power inputs are captured continuously.</p>
+                            </div>
+                            <div class="about-flow-step">
+                                <span>02</span>
+                                <i class="fa-solid fa-microchip"></i>
+                                <h3>Process</h3>
+                                <p>ESP32 controllers package room data and feed the dashboard logic.</p>
+                            </div>
+                            <div class="about-flow-step">
+                                <span>03</span>
+                                <i class="fa-solid fa-brain"></i>
+                                <h3>Decide</h3>
+                                <p>Automation chooses cooling, eco, standby, or alert behavior.</p>
+                            </div>
+                            <div class="about-flow-step">
+                                <span>04</span>
+                                <i class="fa-solid fa-chart-line"></i>
+                                <h3>Visualize</h3>
+                                <p>Live charts, thermal mapping, alerts, and scores make room behavior visible.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-impact-band">
+                        <div>
+                            <span class="about-eyebrow">Impact</span>
+                            <h2>Smarter comfort, lower wastage</h2>
+                            <p>SmartTherm is positioned as a low-cost, retrofit-ready adaptive energy layer for offices, schools, co-working spaces, hotels, hospitals, and other shared environments.</p>
+                        </div>
+                        <div class="about-impact-list">
+                            <span><i class="fa-solid fa-leaf"></i> Reduces unnecessary appliance usage</span>
+                            <span><i class="fa-solid fa-plug-circle-bolt"></i> Detects abnormal power conditions</span>
+                            <span><i class="fa-solid fa-building-circle-check"></i> Scales beyond the prototype room</span>
+                        </div>
                     </div>
                 </div>
             </section>
