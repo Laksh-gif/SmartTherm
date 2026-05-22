@@ -10,7 +10,8 @@ class UIManager {
         this.history = {
             labels: [],
             tempData: [],
-            powerData: []
+            powerData: [],
+            comfortData: []
         };
         this.maxHistoryPoints = 30;
 
@@ -61,7 +62,25 @@ class UIManager {
             
             btnSaveSettings: document.getElementById('btn-save-settings'),
             settingTimeout: document.getElementById('setting-timeout'),
-            settingOverload: document.getElementById('setting-overload')
+            settingOverload: document.getElementById('setting-overload'),
+
+            thermalCard: document.getElementById('thermal-room-card'),
+            thermalRoomName: document.getElementById('thermal-room-name'),
+            thermalTemp: document.getElementById('thermal-room-temp'),
+            thermalState: document.getElementById('thermal-room-state'),
+            thermalStatusPill: document.getElementById('thermal-status-pill'),
+            thermalHumidity: document.getElementById('thermal-humidity'),
+            thermalPower: document.getElementById('thermal-power'),
+            thermalOccupancy: document.getElementById('thermal-occupancy'),
+            thermalAcMode: document.getElementById('thermal-ac-mode'),
+            comfortScore: document.getElementById('comfort-score'),
+            comfortStatus: document.getElementById('comfort-status'),
+            comfortScoreBar: document.getElementById('comfort-score-bar'),
+            comfortTempFactor: document.getElementById('comfort-temp-factor'),
+            comfortHumidityFactor: document.getElementById('comfort-humidity-factor'),
+            comfortOccupancyFactor: document.getElementById('comfort-occupancy-factor'),
+            comfortEnergyFactor: document.getElementById('comfort-energy-factor'),
+            comfortInsight: document.getElementById('comfort-insight')
         };
         
         
@@ -73,6 +92,11 @@ class UIManager {
 
     initChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
+
+        if (typeof Chart === 'undefined') {
+            this.chart = { update: () => {} };
+            return;
+        }
         
        
         Chart.defaults.color = '#a1a1aa';
@@ -100,7 +124,7 @@ class UIManager {
                         pointHoverRadius: 6
                     },
                     {
-                        label: 'Temperature (°C)',
+                        label: 'Temperature (\u00B0C)',
                         data: this.history.tempData,
                         borderColor: '#06b6d4',
                         backgroundColor: 'transparent',
@@ -136,49 +160,75 @@ class UIManager {
     }
 
     initAnalyticsCharts() {
+        if (typeof Chart === 'undefined') return;
+
         const ctxTemp = document.getElementById('analyticsTempChart')?.getContext('2d');
         const ctxOcc = document.getElementById('analyticsOccChart')?.getContext('2d');
         const ctxEnergy = document.getElementById('energyTrendChart')?.getContext('2d');
 
         if (ctxTemp) {
-            new Chart(ctxTemp, {
-                type: 'bar',
+            this.analyticsComfortChart = new Chart(ctxTemp, {
+                type: 'line',
                 data: {
-                    labels: ['Conf Room A', 'Main Office', 'Server Room'],
+                    labels: this.history.labels,
                     datasets: [{
-                        label: 'Avg Temp (°C)',
-                        data: [23.5, 24.1, 20.8],
-                        backgroundColor: ['rgba(6, 182, 212, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(239, 68, 68, 0.8)'],
-                        borderRadius: 8,
-                        borderSkipped: false
+                        label: 'Comfort Score',
+                        data: this.history.comfortData,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                        borderWidth: 3,
+                        tension: 0.45,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: { 
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { grid: { display: false }, border: { display: false } },
-                        y: { grid: { color: 'rgba(255,255,255,0.03)', borderDash: [5, 5] }, border: { display: false } }
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: { callback: value => `${value}%` },
+                            grid: { color: 'rgba(255,255,255,0.04)', borderDash: [5, 5] },
+                            border: { display: false }
+                        }
                     }
                 }
             });
         }
 
         if (ctxOcc) {
-            new Chart(ctxOcc, {
-                type: 'doughnut',
+            this.analyticsFactorChart = new Chart(ctxOcc, {
+                type: 'radar',
                 data: {
-                    labels: ['Occupied', 'Empty', 'Standby'],
+                    labels: ['Temperature', 'Humidity', 'Occupancy', 'Energy'],
                     datasets: [{
-                        data: [45, 30, 25],
-                        backgroundColor: ['#10b981', '#f59e0b', '#3f3f46'],
-                        borderWidth: 0,
-                        hoverOffset: 4
+                        data: [90, 90, 90, 90],
+                        backgroundColor: 'rgba(6, 182, 212, 0.18)',
+                        borderColor: '#06b6d4',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#f8fafc',
+                        pointBorderColor: '#06b6d4'
                     }]
                 },
                 options: { 
-                    responsive: true, maintainAspectRatio: false, cutout: '75%',
-                    plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: { display: false, stepSize: 25 },
+                            grid: { color: 'rgba(255,255,255,0.08)' },
+                            angleLines: { color: 'rgba(255,255,255,0.08)' },
+                            pointLabels: { color: '#cbd5e1', font: { size: 12 } }
+                        }
+                    }
                 }
             });
         }
@@ -210,14 +260,17 @@ class UIManager {
 
     bindEvents() {
        
-        this.els.roomSelector.addEventListener('change', (e) => {
-            this.currentRoomId = e.target.value;
-            
-            this.history.labels = [];
-            this.history.tempData = [];
-            this.history.powerData = [];
-            this.updateUI(); 
-        });
+        if (this.els.roomSelector) {
+            this.els.roomSelector.addEventListener('change', (e) => {
+                this.currentRoomId = e.target.value;
+                
+                this.history.labels = [];
+                this.history.tempData = [];
+                this.history.powerData = [];
+                this.history.comfortData = [];
+                this.updateUI(); 
+            });
+        }
 
         
         this.els.navItems.forEach(item => {
@@ -318,6 +371,8 @@ class UIManager {
         
         const room = this.roomsData[this.currentRoomId];
         const ac = room.acState;
+        const comfort = this.calculateComfort(room);
+        const thermal = this.getThermalState(room.temp);
 
         
         this.els.roomTitle.textContent = room.name;
@@ -325,6 +380,9 @@ class UIManager {
   
         this.els.valTemp.textContent = room.temp.toFixed(1);
         this.els.valPower.textContent = room.power.toFixed(2);
+
+        this.els.trendTemp.className = `trend ${thermal.trendClass}`;
+        this.els.trendTemp.innerHTML = `<i class="fa-solid ${thermal.icon}"></i> ${thermal.label}`;
         
         if (room.power > 3.0) {
             this.els.trendPower.className = 'trend danger';
@@ -352,13 +410,15 @@ class UIManager {
             this.els.valAc.textContent = `ON (${ac.mode.toUpperCase()})`;
             this.els.acIcon.style.animationPlayState = 'running';
             this.els.acIcon.style.color = ac.mode === 'eco' ? 'var(--accent-green)' : 'var(--accent-cyan)';
-            this.els.trendAc.textContent = ac.mode === 'eco' ? 'Energy Saving Active' : `Target: ${ac.targetTemp}°C`;
+            this.els.trendAc.textContent = ac.mode === 'eco' ? 'Energy Saving Active' : `Target: ${ac.targetTemp}\u00B0C`;
         } else {
             this.els.valAc.textContent = 'OFF';
             this.els.acIcon.style.animationPlayState = 'paused';
             this.els.acIcon.style.color = 'var(--text-muted)';
             this.els.trendAc.textContent = 'Standby';
         }
+
+        this.updateThermalMapping(room, comfort, thermal);
 
      
         this.els.autoToggle.checked = this.automation.settings.autoEnabled[this.currentRoomId];
@@ -385,14 +445,142 @@ class UIManager {
         this.history.labels.push(timeLabel);
         this.history.powerData.push(room.power);
         this.history.tempData.push(room.temp);
+        this.history.comfortData.push(comfort.score);
 
         if (this.history.labels.length > this.maxHistoryPoints) {
             this.history.labels.shift();
             this.history.powerData.shift();
             this.history.tempData.shift();
+            this.history.comfortData.shift();
         }
 
         this.chart.update('none'); 
+        if (this.analyticsComfortChart) this.analyticsComfortChart.update('none');
+        if (this.analyticsFactorChart) {
+            this.analyticsFactorChart.data.datasets[0].data = [
+                comfort.factors.temperature,
+                comfort.factors.humidity,
+                comfort.factors.occupancy,
+                comfort.factors.energy
+            ];
+            this.analyticsFactorChart.update('none');
+        }
+    }
+
+    clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    getThermalState(temp) {
+        if (temp >= 22 && temp <= 26) {
+            return {
+                key: 'safe',
+                className: 'thermal-safe',
+                label: 'Safe Zone',
+                detail: 'Balanced cooling envelope',
+                icon: 'fa-circle-check',
+                trendClass: ''
+            };
+        }
+
+        if ((temp > 26 && temp < 29) || (temp >= 19 && temp < 22)) {
+            return {
+                key: 'caution',
+                className: 'thermal-caution',
+                label: 'Watch Zone',
+                detail: temp > 26 ? 'Warm drift detected' : 'Cooling below comfort band',
+                icon: 'fa-triangle-exclamation',
+                trendClass: 'warning'
+            };
+        }
+
+        return {
+            key: 'critical',
+            className: 'thermal-critical',
+            label: 'Action Zone',
+            detail: temp >= 29 ? 'High temperature intervention needed' : 'Temperature outside comfort range',
+            icon: 'fa-circle-exclamation',
+            trendClass: 'danger'
+        };
+    }
+
+    calculateComfort(room) {
+        const ac = room.acState;
+        const humidity = typeof room.humidity === 'number' ? room.humidity : 50;
+        const overloadLimit = this.automation.settings.powerOverloadThreshold || 4;
+
+        const temperature = Math.round(this.clamp(100 - Math.abs(room.temp - 24) * 13, 0, 100));
+        const humidityScore = Math.round(this.clamp(100 - Math.abs(humidity - 50) * 2.8, 0, 100));
+        const occupancy = Math.round(room.occupied ? (ac.on ? 96 : 68) : ((!ac.on || ac.mode === 'eco') ? 94 : 72));
+        const energy = Math.round(this.clamp(100 - (room.power / overloadLimit) * 60, 0, 100));
+        const modeFit = Math.round(
+            room.occupied
+                ? (ac.on && ac.mode !== 'eco' ? 94 : ac.on ? 84 : 62)
+                : (!ac.on ? 96 : ac.mode === 'eco' ? 94 : 74)
+        );
+
+        const score = Math.round(
+            temperature * 0.34 +
+            humidityScore * 0.22 +
+            occupancy * 0.18 +
+            energy * 0.18 +
+            modeFit * 0.08
+        );
+
+        let status = 'Excellent comfort balance';
+        let level = 'high';
+        let insight = 'The room is inside the preferred thermal range with efficient appliance activity.';
+
+        if (score < 70) {
+            status = 'Needs attention';
+            level = 'low';
+            insight = 'Temperature, humidity, or power load is pulling the room away from the ideal comfort band.';
+        } else if (score < 85) {
+            status = 'Comfort stabilizing';
+            level = 'medium';
+            insight = 'The room is usable, with minor thermal or efficiency drift being corrected by automation.';
+        }
+
+        return {
+            score,
+            status,
+            level,
+            insight,
+            factors: {
+                temperature,
+                humidity: humidityScore,
+                occupancy,
+                energy
+            }
+        };
+    }
+
+    updateThermalMapping(room, comfort, thermal) {
+        if (!this.els.thermalCard) return;
+
+        const ac = room.acState;
+        this.els.thermalCard.classList.remove('thermal-safe', 'thermal-caution', 'thermal-critical');
+        this.els.thermalCard.classList.add(thermal.className);
+
+        this.els.thermalRoomName.textContent = room.name;
+        this.els.thermalTemp.textContent = `${room.temp.toFixed(1)}\u00B0C`;
+        this.els.thermalState.textContent = thermal.detail;
+        this.els.thermalStatusPill.textContent = thermal.label;
+        this.els.thermalStatusPill.className = `thermal-status-pill ${thermal.key}`;
+        this.els.thermalHumidity.textContent = `${Math.round(room.humidity)}% RH`;
+        this.els.thermalPower.textContent = `${room.power.toFixed(2)} kW`;
+        this.els.thermalOccupancy.textContent = room.occupied ? 'Occupied' : 'Empty';
+        this.els.thermalAcMode.textContent = ac.on ? ac.mode.charAt(0).toUpperCase() + ac.mode.slice(1) : 'Off';
+
+        this.els.comfortScore.textContent = comfort.score;
+        this.els.comfortStatus.textContent = comfort.status;
+        this.els.comfortInsight.textContent = comfort.insight;
+        this.els.comfortScoreBar.style.width = `${comfort.score}%`;
+        this.els.comfortScoreBar.className = `comfort-meter-fill comfort-${comfort.level}`;
+        this.els.comfortTempFactor.textContent = `Temp ${comfort.factors.temperature}`;
+        this.els.comfortHumidityFactor.textContent = `Humidity ${comfort.factors.humidity}`;
+        this.els.comfortOccupancyFactor.textContent = `Occupancy ${comfort.factors.occupancy}`;
+        this.els.comfortEnergyFactor.textContent = `Energy ${comfort.factors.energy}`;
     }
 
     addLogEntry(event) {
