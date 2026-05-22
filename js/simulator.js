@@ -6,9 +6,15 @@
 class ESP32Simulator {
     constructor() {
         this.rooms = {
-            'room1': { name: 'Conference Room A', temp: 24.5, power: 0.2, occupied: false, acState: { on: false, mode: 'cool', targetTemp: 24 }, lastMovement: Date.now() },
-            'room2': { name: 'Main Office', temp: 23.0, power: 1.5, occupied: true, acState: { on: true, mode: 'cool', targetTemp: 22 }, lastMovement: Date.now() },
-            'room3': { name: 'Server Room', temp: 20.5, power: 3.2, occupied: false, acState: { on: true, mode: 'cool', targetTemp: 20 }, lastMovement: Date.now() }
+            room1: {
+                name: 'Prototype Room',
+                temp: 24.5,
+                humidity: 48,
+                power: 0.8,
+                occupied: true,
+                acState: { on: true, mode: 'cool', targetTemp: 24 },
+                lastMovement: Date.now()
+            }
         };
         
         this.listeners = [];
@@ -25,10 +31,10 @@ class ESP32Simulator {
             this.emit();
         }, 2000);
 
-        // Randomly change occupancy every 15-30 seconds for simulation purposes
+        // Randomly change occupancy to demonstrate adaptive prototype behavior.
         setInterval(() => {
             this.randomizeOccupancy();
-        }, 20000);
+        }, 22000);
     }
 
     stop() {
@@ -48,35 +54,35 @@ class ESP32Simulator {
         Object.keys(this.rooms).forEach(roomId => {
             let room = this.rooms[roomId];
             
-            // Temperature simulation
             let tempDelta = 0;
             if (room.acState.on) {
                 if (room.acState.mode === 'cool' && room.temp > room.acState.targetTemp) {
-                    tempDelta = -0.1; // Cooling down
+                    tempDelta = -0.1;
                 } else if (room.acState.mode === 'eco') {
-                    // Eco mode cools slower
                     if (room.temp > room.acState.targetTemp + 1) tempDelta = -0.05;
-                    else tempDelta = 0.05; // Drifts up slightly
+                    else tempDelta = 0.05;
                 } else if (room.acState.mode === 'fan') {
-                    tempDelta = 0.02; // Fan doesn't cool, temp drifts up slowly
+                    tempDelta = 0.02;
                 }
             } else {
-                // AC is off, temp drifts towards ambient (assume 28C)
                 if (room.temp < 28) tempDelta = +0.1;
             }
             
-            // Add some noise
             tempDelta += (Math.random() - 0.5) * 0.05;
-            room.temp = Math.max(16, Math.min(35, room.temp + tempDelta)); // Bound between 16-35
+            room.temp = Math.max(16, Math.min(35, room.temp + tempDelta));
 
-            // Power simulation
-            let basePower = 0.1; // Baseline (lights, small devices)
-            if (roomId === 'room3') basePower = 2.0; // Server room has high base load
+            let humidityDelta = (Math.random() - 0.5) * 0.8;
+            if (room.acState.on && room.acState.mode === 'cool') humidityDelta -= 0.15;
+            if (room.acState.on && room.acState.mode === 'fan') humidityDelta += 0.05;
+            if (!room.acState.on) humidityDelta += 0.18;
+            if (room.occupied) humidityDelta += 0.08;
+            room.humidity = Math.max(35, Math.min(75, room.humidity + humidityDelta));
+
+            let basePower = room.occupied ? 0.28 : 0.16;
 
             let acPower = 0;
             if (room.acState.on) {
                 if (room.acState.mode === 'cool') {
-                    // If room is hot, AC works harder (more power)
                     let diff = Math.max(0, room.temp - room.acState.targetTemp);
                     acPower = 1.0 + (diff * 0.2); 
                 } else if (room.acState.mode === 'eco') {
@@ -86,12 +92,10 @@ class ESP32Simulator {
                 }
             }
 
-            // Random spikes
             let noise = (Math.random() * 0.1);
             let simulatedPower = basePower + acPower + noise;
 
-            // Introduce occasional overload spike for testing alerts (2% chance)
-            if (Math.random() < 0.02 && room.acState.on) {
+            if (Math.random() < 0.025 && room.acState.on) {
                 simulatedPower += 2.5; 
             }
 
@@ -100,18 +104,10 @@ class ESP32Simulator {
     }
 
     randomizeOccupancy() {
-        // Randomly toggle occupancy for a room to test automation
-        const roomIds = Object.keys(this.rooms);
-        const randomRoomId = roomIds[Math.floor(Math.random() * roomIds.length)];
-        
-        // Don't toggle server room occupancy as often
-        if (randomRoomId === 'room3' && Math.random() > 0.3) return;
-
-        let room = this.rooms[randomRoomId];
+        let room = this.rooms.room1;
         room.occupied = !room.occupied;
         room.lastMovement = Date.now();
         
-        // Trigger immediate emit for occupancy change
         this.emit();
     }
 
