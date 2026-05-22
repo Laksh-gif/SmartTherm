@@ -7,9 +7,7 @@ class AutomationEngine {
             unoccupiedTimeoutMs: 15000, 
             powerOverloadThreshold: 4.0,
             autoEnabled: {
-                'room1': true,
-                'room2': true,
-                'room3': true 
+                room1: true
             }
         };
 
@@ -59,6 +57,8 @@ class AutomationEngine {
 
            
             if (!room.occupied) {
+                this.lastState[`${roomId}_occupied_cool_triggered`] = false;
+
                 const timeSinceMovement = now - room.lastMovement;
                 if (timeSinceMovement > this.settings.unoccupiedTimeoutMs && room.acState.on && room.acState.mode === 'cool') {
                 
@@ -72,6 +72,16 @@ class AutomationEngine {
             } else {
                 
                 this.lastState[`${roomId}_eco_triggered`] = false;
+
+                if (room.acState.on && room.acState.mode === 'eco' && !this.lastState[`${roomId}_overload`]) {
+                     if (!this.lastState[`${roomId}_occupied_cool_triggered`]) {
+                         this.logEvent(roomId, 'Occupancy detected. Switching ECO -> COOL for comfort.', 'info');
+                         this.simulator.setACState(roomId, { mode: 'cool' });
+                         this.lastState[`${roomId}_occupied_cool_triggered`] = true;
+                     }
+
+                     return;
+                }
                 
                 if (!room.acState.on && room.temp > room.acState.targetTemp + 0.5) {
                      if (!this.lastState[`${roomId}_auto_on`]) {
@@ -83,13 +93,8 @@ class AutomationEngine {
                      this.lastState[`${roomId}_auto_on`] = false;
                 }
 
-              
-                if (room.acState.on && room.acState.mode === 'eco' && room.temp > room.acState.targetTemp + 1.0) {
-                  
-                     if (!this.lastState[`${roomId}_overload`]) {
-                         this.logEvent(roomId, 'Room warming up while occupied. Switching ECO -> COOL.', 'info');
-                         this.simulator.setACState(roomId, { mode: 'cool' });
-                     }
+                if (room.acState.mode !== 'eco') {
+                    this.lastState[`${roomId}_occupied_cool_triggered`] = false;
                 }
             }
         });
