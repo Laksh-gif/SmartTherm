@@ -19,10 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const loader = document.getElementById('loader');
         const appContainer = document.getElementById('app-container');
         
+        if (!loader) return;
+        
         loader.style.opacity = '0';
         loader.style.visibility = 'hidden';
         
-        appContainer.style.opacity = '1';
+        if (appContainer) appContainer.style.opacity = '1';
         
         setTimeout(() => {
             if (loader.parentNode) loader.parentNode.removeChild(loader);
